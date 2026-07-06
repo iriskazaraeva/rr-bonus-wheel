@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>РР — Колесо бонусов (прототип)</title>
+</head>
+<body>
+<title>РР — Колесо бонусов (прототип)</title>
+<style>
+  :root{
+    /* ═══ Палитра из приложения РР ═══ */
+    --navy:#20315B; --navy-deep:#172444;
+    --sky:#4FA3DD; --sky-soft:#E1EFFA;
+    --green:#3DA75C; --green-soft:#E3F4E8;
+    --orange:#F5A93B;
+    --red:#E23B3B;
+    --page:#EDEFF2; --card:#FFFFFF; --card-gray:#E6E8EC;
+    --text:#1C2333; --mist:#8A93A6;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--page);color:var(--text);font-family:-apple-system,"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;line-height:1.5;margin:0;padding:32px 20px 64px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header.top{margin-bottom:24px}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sky);font-weight:700}
+  h1{font-size:clamp(24px,4vw,34px);margin:6px 0 8px;font-weight:800;letter-spacing:-.01em;color:var(--navy);text-wrap:balance}
+  .lede{color:var(--mist);max-width:64ch;margin:0}
+  .grid{display:grid;grid-template-columns:404px 1fr;gap:36px;align-items:start}
+  @media (max-width:880px){.grid{grid-template-columns:1fr}}
+
+  /* ── Демо-панель ── */
+  .demo-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .step{font-size:12px;font-weight:700;color:var(--mist);background:var(--card);border-radius:99px;padding:5px 12px;border:1px solid transparent;cursor:pointer;transition:color .12s,border-color .12s}
+  .step:hover{color:var(--navy)}
+  .step.on{color:var(--navy);border-color:var(--sky)}
+  .step:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+  .reset{margin-left:auto;font-size:12px;font-weight:700;color:var(--sky);background:none;border:0;cursor:pointer;padding:5px 8px}
+  .reset:hover{text-decoration:underline}
+
+  /* ── Телефон ── */
+  .phone-col{position:sticky;top:24px}
+  @media (max-width:880px){.phone-col{position:static;max-width:404px;margin:0 auto}}
+  .phone{background:var(--navy-deep);border-radius:38px;padding:12px;box-shadow:0 24px 60px rgba(23,36,68,.28)}
+  .screen{background:var(--page);border-radius:28px;overflow:hidden;position:relative;height:740px;display:flex;flex-direction:column}
+  .view{display:none;flex-direction:column;height:100%;overflow-y:auto;scrollbar-width:none}
+  .view::-webkit-scrollbar{display:none}
+  .view.on{display:flex}
+
+  /* статус-бар */
+  .sbar{display:flex;justify-content:space-between;padding:10px 22px 4px;font-size:13px;font-weight:700;color:var(--text);background:var(--card);flex-shrink:0}
+  .view.gray .sbar{background:var(--page)}
+
+  /* ── ГЛАВНАЯ ── */
+  .home-head{display:flex;align-items:center;gap:10px;padding:10px 16px 14px;background:var(--card)}
+  .ava{width:44px;height:44px;border-radius:50%;background:var(--card-gray);display:flex;align-items:center;justify-content:center;color:var(--mist)}
+  .home-head .name{font-weight:800;font-size:17px}
+  .rr-badge{margin-left:auto;width:42px;height:42px;border-radius:12px;background:var(--navy);color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(23,36,68,.25)}
+  .hsec{font-size:24px;font-weight:800;margin:16px 16px 10px;letter-spacing:-.01em}
+  .stories{display:flex;gap:10px;padding:0 16px;overflow-x:auto;scrollbar-width:none}
+  .stories::-webkit-scrollbar{display:none}
+  .story{flex-shrink:0;width:64px;height:64px;border-radius:50%;border:2.5px solid var(--sky);padding:2.5px;background:var(--card)}
+  .story-in{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;overflow:hidden}
+  .st-wheel{background:conic-gradient(var(--navy) 0 45deg,#fff 45deg 90deg,var(--sky-soft) 90deg 135deg,var(--orange) 135deg 180deg,var(--navy) 180deg 225deg,#fff 225deg 270deg,var(--sky-soft) 270deg 315deg,var(--orange) 315deg 360deg);position:relative}
+  .st-wheel::after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:var(--navy);border:3px solid #fff}
+  .st-a{background:#fff;color:var(--navy);font-size:7px;padding:4px}
+  .st-b{background:#fff;color:var(--red);font-size:8px;padding:4px}
+  .st-c{background:var(--navy);color:#fff;font-size:7px;padding:4px}
+  .st-d{background:var(--navy);color:#B8E986;font-size:8px;padding:4px}
+  .wcard{position:relative;display:flex;align-items:center;gap:14px;margin:0 16px 12px;padding:20px 16px;background:var(--card-gray);border-radius:24px;cursor:pointer;overflow:hidden;transition:transform .12s}
+  .wcard:hover{transform:translateY(-1px)}
+  .wcard::before{content:"";position:absolute;right:-30%;top:-60%;width:120%;height:120%;background:rgba(255,255,255,.45);border-radius:50%;transform:rotate(-12deg);pointer-events:none}
+  .wcard>*{position:relative}
+  .wicon{width:44px;height:44px;color:var(--navy);flex-shrink:0}
+  .wbody{flex:1;min-width:0}
+  .wtitle{font-weight:800;font-size:17px;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .wsub{font-size:13px;color:var(--mist);margin-top:2px}
+  .chev{color:var(--mist);font-size:20px;flex-shrink:0}
+  .dot{min-width:20px;height:20px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 6px}
+  .dot.on{display:inline-flex}
+  /* плашка вращения */
+  .spin-banner{display:none;align-items:center;gap:12px;margin:0 16px 14px;padding:13px 16px;background:var(--navy);border-radius:18px;color:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(23,36,68,.28);transition:transform .12s}
+  .spin-banner:hover{transform:translateY(-1px)}
+  .spin-banner.on{display:flex}
+  .mini-wheel{width:38px;height:38px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--sky) 0 45deg,#fff 45deg 90deg,var(--orange) 90deg 135deg,#fff 135deg 180deg,var(--sky) 180deg 225deg,#fff 225deg 270deg,var(--orange) 270deg 315deg,#fff 315deg 360deg);position:relative;animation:slow 14s linear infinite}
+  @keyframes slow{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.mini-wheel{animation:none}}
+  .mini-wheel::after{content:"";position:absolute;inset:11px;border-radius:50%;background:var(--navy);border:2px solid #fff}
+  .sb-title{font-weight:800;font-size:14.5px}
+  .sb-sub{font-size:12px;opacity:.75}
+  .spin-banner .chev{color:rgba(255,255,255,.6);margin-left:auto}
+  .bonus-banner{display:none;align-items:center;gap:10px;margin:0 16px 14px;padding:12px 16px;background:var(--green-soft);border:1px solid rgba(61,167,92,.4);border-radius:18px;color:var(--green);font-size:12.5px;font-weight:700}
+  .bonus-banner.on{display:flex}
+  .tabbar{margin-top:auto;display:flex;justify-content:space-around;align-items:center;padding:12px 8px 18px;background:var(--card);border-top:1px solid var(--card-gray);flex-shrink:0}
+  .tab{width:26px;height:26px;color:#B4BAC7}
+  .tab.on{color:var(--navy)}
+
+  /* ── ЗАДАНИЕ ВЫПОЛНЕНО ── */
+  .done-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:24px 20px}
+  .done-card{background:var(--card);border-radius:24px;padding:28px 22px;text-align:center;box-shadow:0 4px 20px rgba(23,36,68,.08)}
+  .check{width:74px;height:74px;border-radius:50%;background:var(--green);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#fff}
+  .done-title{font-size:22px;font-weight:800;color:var(--navy)}
+  .done-sub{font-size:14px;color:var(--mist);margin:4px 0 2px}
+  .done-pay{font-size:28px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums;background:var(--green-soft);border-radius:14px;padding:8px 18px;display:inline-block;margin:10px 0 4px}
+  .done-div{border:0;border-top:1px solid var(--card-gray);margin:18px 0 16px}
+  .spin-offer{display:flex;align-items:center;gap:12px;text-align:left;background:var(--sky-soft);border-radius:16px;padding:13px 14px;margin-bottom:16px}
+  .so-title{font-weight:800;font-size:14.5px;color:var(--navy)}
+  .so-sub{font-size:12px;color:#5A7A99}
+  .cta{padding:16px;border:0;border-radius:16px;background:var(--navy);color:#fff;font-size:16px;font-weight:700;cursor:pointer;width:100%;transition:background .15s,transform .12s,opacity .2s}
+  .cta:hover:enabled{background:var(--navy-deep);transform:translateY(-1px)}
+  .cta:disabled{opacity:.35;cursor:default}
+  .cta:focus-visible,.ghost:focus-visible,.check-in:focus-visible,.reset:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+  .ghost{width:100%;padding:13px;border:0;background:none;color:var(--mist);font-size:14px;font-weight:600;cursor:pointer;border-radius:12px;margin-top:4px}
+  .ghost:hover{color:var(--text)}
+
+  /* ── КОЛЕСО ── */
+  .wheel-head{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);flex-shrink:0}
+  .back{border:0;background:none;color:var(--navy);cursor:pointer;padding:4px;display:flex}
+  .wh-title{font-weight:800;font-size:17px}
+  .wh-spins{margin-left:auto;font-size:12px;color:var(--green);background:var(--green-soft);border-radius:99px;padding:5px 12px;font-weight:700}
+  .wheel-sub{font-size:13px;color:var(--mist);margin:12px 18px 4px;text-align:center}
+  .wheelbox{position:relative;display:flex;justify-content:center;padding:16px 0 4px}
+  .pointer{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:0;height:0;border:11px solid transparent;border-top:17px solid var(--navy);filter:drop-shadow(0 2px 4px rgba(23,36,68,.35));z-index:2}
+  canvas{display:block}
+  .hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-36%);width:60px;height:60px;border-radius:50%;background:var(--navy);border:4px solid #fff;box-shadow:0 2px 10px rgba(23,36,68,.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;z-index:1}
+  .wheel-cta-box{padding:0 18px}
+  .hint{font-size:12px;color:var(--mist);text-align:center;margin:8px 18px 12px}
+  .status{margin:0 18px 12px;padding:10px 14px;border-radius:12px;background:var(--green-soft);border:1px solid rgba(61,167,92,.4);color:var(--green);font-size:12.5px;font-weight:700;display:none}
+  .status.on{display:block}
+
+  .sheet{position:absolute;inset:0;background:rgba(28,35,51,.45);display:none;align-items:flex-end;z-index:5}
+  .sheet.open{display:flex}
+  .sheet-card{background:var(--card);border-radius:24px 24px 28px 28px;padding:22px 20px;width:100%;animation:up .3s ease}
+  @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  @media (prefers-reduced-motion:reduce){.sheet-card{animation:none}}
+  .prize-tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--sky);font-weight:800}
+  .prize-name{font-size:22px;font-weight:800;margin:6px 0 4px;color:var(--navy)}
+  .prize-desc{font-size:13.5px;color:var(--mist);margin:0 0 14px}
+  .prize-note{font-size:12px;color:var(--mist);background:var(--page);border-radius:12px;padding:10px 12px;margin:0 0 14px;line-height:1.5}
+  .elig{margin:10px 18px 0;padding:9px 12px;border-radius:12px;font-size:12.5px;font-weight:700;text-align:center;background:var(--green-soft);color:var(--green)}
+  .elig.frozen{background:#FDE8E8;color:#C0392B}
+
+  /* ── Спека ── */
+  .spec h3{font-size:17px;font-weight:800;color:var(--navy);margin:26px 0 8px}
+  .spec h3:first-child{margin-top:0}
+  .spec p,.spec li{font-size:14.5px;color:#4A5265}
+  .spec li{margin:5px 0}
+  .spec b{color:var(--text);font-weight:700}
+  .tablebox{overflow-x:auto;border-radius:14px;background:var(--card);box-shadow:0 1px 4px rgba(23,36,68,.08)}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:460px}
+  th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);text-align:left;padding:10px 14px;border-bottom:1px solid var(--page)}
+  td{padding:9px 14px;border-bottom:1px solid var(--page)}
+  tr:last-child td{border-bottom:0}
+  .note{border-left:3px solid var(--sky);background:var(--card);border-radius:0 14px 14px 0;padding:12px 16px;font-size:13.5px;color:#4A5265;margin-top:22px;box-shadow:0 1px 4px rgba(23,36,68,.08)}
+
+  /* ═══ CRM: кабинет маркетолога ═══ */
+  .crm-sec{margin-top:52px}
+  .crm-sec .lede{margin-bottom:18px}
+  .crm-scroll{overflow-x:auto;border-radius:14px;box-shadow:0 10px 40px rgba(23,36,68,.12)}
+  .crm{min-width:920px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #E2E5EA;font-size:13.5px}
+  .crm-top{background:#2374D5;color:#fff;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:12.5px}
+  .crm-top .r{display:flex;align-items:center;gap:14px}
+  .crm-body{display:flex}
+  .crm-side{width:212px;border-right:1px solid #EDF0F3;padding:12px 0 18px;flex-shrink:0}
+  .crm-user{padding:6px 18px 14px;border-bottom:1px solid #EDF0F3;margin-bottom:8px}
+  .crm-user b{font-size:14px}
+  .crm-user span{display:block;font-size:12px;color:#8A93A6}
+  .it{padding:9px 18px;color:#4A5265;display:flex;gap:10px;align-items:center;font-size:13px}
+  .it svg{flex-shrink:0;color:#5A6478}
+  .it.sub{padding-left:46px}
+  .it.on{background:#E8F1FC;color:#2374D5;font-weight:700;box-shadow:inset -2px 0 0 #2374D5}
+  .crm-main{flex:1;padding:16px 22px 24px;min-width:0}
+  .crumb{font-size:12px;color:#8A93A6;margin-bottom:8px}
+  .crumb b{color:#2374D5;font-weight:600}
+  .crm-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .crm-title h4{font-size:19px;font-weight:700;color:#1C2333;margin:0}
+  .pill{font-size:11.5px;font-weight:700;border-radius:99px;padding:4px 12px;color:#fff}
+  .pill.g{background:#3DA75C}
+  .crm-dates{font-size:12px;color:#8A93A6}
+  .crm-tabs{display:flex;border-bottom:2px solid #EDF0F3;margin:16px 0 18px}
+  .ctab{padding:10px 18px;font-size:12.5px;font-weight:700;letter-spacing:.05em;color:#8A93A6;cursor:pointer;border:0;background:none;text-transform:uppercase;margin-bottom:-2px}
+  .ctab.on{color:#2374D5;box-shadow:inset 0 -2px 0 #2374D5}
+  .ctab:focus-visible{outline:2px solid #2374D5;outline-offset:-2px}
+  .cpanel{display:none}
+  .cpanel.on{display:block}
+  /* настройка */
+  .params{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:16px}
+  .param label{display:block;font-size:11px;color:#8A93A6;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+  .param input{width:110px;padding:7px 10px;border:1px solid #D5DAE2;border-radius:8px;font-size:14px;font-weight:600;color:#1C2333;font-variant-numeric:tabular-nums}
+  .param input:focus-visible{outline:2px solid #2374D5;border-color:#2374D5}
+  table.ct{border-collapse:collapse;width:100%;font-size:13px}
+  .ct th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8A93A6;text-align:left;padding:9px 12px;border-bottom:2px solid #EDF0F3;white-space:nowrap}
+  .ct td{padding:8px 12px;border-bottom:1px solid #F1F3F6;color:#1C2333;white-space:nowrap}
+  .ct td.num,.ct th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .ct input{width:64px;padding:5px 8px;border:1px solid #D5DAE2;border-radius:6px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+  .ct input:focus-visible{outline:2px solid #2374D5;border-color:#2374D5}
+  .tag{font-size:10.5px;font-weight:700;border-radius:99px;padding:2px 9px}
+  .tag.free{background:#EEF1F5;color:#5A6478}
+  .tag.cond{background:#E1EFFA;color:#2374D5}
+  .tag.cash{background:#FDEFD8;color:#C07A10}
+  .totals{display:flex;gap:26px;flex-wrap:wrap;margin-top:14px;padding:13px 16px;background:#F6F8FB;border-radius:10px}
+  .tot label{display:block;font-size:11px;color:#8A93A6;text-transform:uppercase;letter-spacing:.06em}
+  .tot b{font-size:19px;font-variant-numeric:tabular-nums}
+  .tot b.bad{color:#E23B3B}
+  .tot b.ok{color:#3DA75C}
+  /* аналитика */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .kpi{border:1px solid #EDF0F3;border-radius:10px;padding:12px 14px}
+  .kpi label{font-size:11px;color:#8A93A6;text-transform:uppercase;letter-spacing:.06em}
+  .kpi .v{font-size:23px;font-weight:800;color:#1C2333;font-variant-numeric:tabular-nums;margin-top:2px}
+  .kpi .d{font-size:11.5px;font-weight:700;margin-top:2px}
+  .d.up{color:#3DA75C}.d.dn{color:#E23B3B}.d.mut{color:#8A93A6}
+  .charts{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:18px}
+  .chart-card{border:1px solid #EDF0F3;border-radius:10px;padding:14px}
+  .chart-card h5{margin:0 0 10px;font-size:13px;font-weight:700;color:#1C2333}
+  .legend{display:flex;gap:14px;font-size:11.5px;color:#8A93A6;margin-top:8px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .dev-note{margin-top:10px;font-size:12.5px;color:#5A6478}
+  .dev-note summary{cursor:pointer;color:#2374D5;font-weight:700;font-size:12px;user-select:none}
+  .dev-note summary:focus-visible{outline:2px solid #2374D5;outline-offset:2px}
+  .dev-note p{margin:8px 0 0;background:#F6F8FB;border-radius:8px;padding:10px 12px;line-height:1.55}
+  .dev-note code{background:#E8F1FC;border-radius:4px;padding:1px 5px;font-size:11.5px}
+  .col-hint{font-size:11.5px;color:#8A93A6;margin-top:8px}
+  .hyp{background:#E8F1FC;border-left:3px solid #2374D5;border-radius:0 10px 10px 0;padding:12px 16px;font-size:13.5px;color:#1C2333;margin-bottom:16px;line-height:1.55}
+  .psel-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .psel-row label{font-size:12px;color:#8A93A6}
+  .psel{padding:7px 10px;border:1px solid #D5DAE2;border-radius:8px;font-size:13px;color:#1C2333;background:#fff;font-weight:600}
+  .psel:focus-visible{outline:2px solid #2374D5;border-color:#2374D5}
+  .per-dates{font-size:12px;color:#8A93A6;font-variant-numeric:tabular-nums}
+  .funnel{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+  .fr{display:flex;align-items:center;gap:12px}
+  .fr .fl{width:220px;font-size:12.5px;color:#4A5265;flex-shrink:0}
+  .fbar{height:26px;border-radius:6px;background:#2374D5;display:flex;align-items:center;padding:0 10px;color:#fff;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;min-width:70px}
+  .fr:nth-child(2) .fbar{background:#4F92E0}
+  .fr:nth-child(3) .fbar{background:#7FB1E9}
+  .fr .fp{font-size:12px;color:#8A93A6;font-variant-numeric:tabular-nums}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Прототип фичи · приложение РР</div>
+  <h1>Колесо бонусов — встроено в приложение</h1>
+  <p class="lede">Механика по гипотезе команды: вращение — за каждое выполненное задание, а доступ к колесу есть только у тех, кто не отказывается от принятых заданий. Отказ замораживает колесо на 7 дней и сжигает накопленные вращения. Всё кликабельно — включая кнопку «Симулировать отказ».</p>
+</header>
+
+<div class="grid">
+  <div class="phone-col">
+    <div class="demo-bar">
+      <button class="step" id="stDone" type="button">1 · Задание выполнено</button>
+      <button class="step" id="stHome" type="button">2 · Главная</button>
+      <button class="step" id="stWheel" type="button">3 · Колесо</button>
+      <button class="reset" id="simRef" style="color:#E23B3B">✕ Симулировать отказ</button>
+      <button class="reset" id="resetBtn" style="margin-left:0">⟳ Заново</button>
+    </div>
+    <div class="phone"><div class="screen">
+
+      <!-- ЭКРАН: ЗАДАНИЕ ВЫПОЛНЕНО -->
+      <div class="view gray" id="vDone">
+        <div class="sbar"><span>14:56</span><span>▮▮▮ ⬤</span></div>
+        <div class="done-wrap"><div class="done-card">
+          <div class="check"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 7"/></svg></div>
+          <div class="done-title">Задание выполнено</div>
+          <div class="done-sub">Комплектовщик · Москва, Анненский проезд</div>
+          <div class="done-pay">+ 4 499 ₽</div>
+          <div class="done-sub">Выплата зачислена на баланс</div>
+          <hr class="done-div">
+          <div class="spin-offer">
+            <div class="mini-wheel"></div>
+            <div><div class="so-title">Вам начислено вращение!</div>
+            <div class="so-sub">Крутите колесо и заберите бонус</div></div>
+          </div>
+          <button class="cta" id="doneSpin">Крутить колесо</button>
+          <button class="ghost" id="doneLater">Позже</button>
+        </div></div>
+      </div>
+
+      <!-- ЭКРАН: ГЛАВНАЯ -->
+      <div class="view" id="vHome">
+        <div class="sbar"><span>14:56</span><span>▮▮▮ ⬤</span></div>
+        <div class="home-head">
+          <span class="ava"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7z"/></svg></span>
+          <span class="name">Иван</span>
+          <span class="rr-badge">РР</span>
+        </div>
+        <div class="hsec">Истории</div>
+        <div class="stories">
+          <div class="story"><div class="story-in st-wheel"></div></div>
+          <div class="story"><div class="story-in st-a">ЧАСОВЫЕ РАБОТЫ</div></div>
+          <div class="story"><div class="story-in st-b">СРОЧНО!</div></div>
+          <div class="story"><div class="story-in st-c">УСЛУГИ ПЛИТОЧНИКА</div></div>
+          <div class="story"><div class="story-in st-d">ТВОИ 2000₽ ТУТ</div></div>
+        </div>
+        <div class="hsec">Работа</div>
+        <div class="spin-banner" id="spinBanner">
+          <div class="mini-wheel"></div>
+          <div><div class="sb-title">У вас 1 вращение</div>
+          <div class="sb-sub">Крутите колесо — заберите бонус</div></div>
+          <span class="chev">›</span>
+        </div>
+        <div class="bonus-banner" id="bonusBanner"></div>
+        <div class="bonus-banner" id="frozenBanner" style="background:#FDE8E8;border-color:rgba(226,59,59,.35);color:#C0392B"></div>
+        <div class="wcard">
+          <svg class="wicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M15 3l6 6M18 6l-8.5 8.5M9.5 14.5L4 20M9.5 14.5l-3-3L3 15l6 6 3.5-3.5z"/></svg>
+          <div class="wbody"><div class="wtitle">Подработка</div><div class="wsub">Временная работа с ежедневной оплатой</div></div>
+          <span class="chev">›</span>
+        </div>
+        <div class="wcard">
+          <svg class="wicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
+          <div class="wbody"><div class="wtitle">Вахта</div><div class="wsub">Работа вахтовым методом по всей России</div></div>
+          <span class="chev">›</span>
+        </div>
+        <div class="wcard">
+          <svg class="wicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 21h18M4 21v-4h6v4M14 21v-8h6v8M9 13V9h6v4M4 13h5"/></svg>
+          <div class="wbody"><div class="wtitle">Вакансии</div><div class="wsub">Постоянная работа в штате</div></div>
+          <span class="chev">›</span>
+        </div>
+        <div class="wcard" id="bonusCard">
+          <svg class="wicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 15L15 9"/><circle cx="9.2" cy="9.2" r="1.3"/><circle cx="14.8" cy="14.8" r="1.3"/></svg>
+          <div class="wbody"><div class="wtitle">Акции и бонусы <span class="dot" id="cardDot">1</span></div><div class="wsub">Колесо бонусов и спецпредложения</div></div>
+          <span class="chev">›</span>
+        </div>
+        <div class="tabbar">
+          <svg class="tab on" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11L12 3l9 8v10h-6v-6h-6v6H3z"/></svg>
+          <svg class="tab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+          <svg class="tab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+          <svg class="tab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6-7-11.5a7 7 0 0114 0C19 15 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+          <svg class="tab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/></svg>
+        </div>
+      </div>
+
+      <!-- ЭКРАН: КОЛЕСО -->
+      <div class="view" id="vWheel">
+        <div class="sbar" style="background:var(--card)"><span>14:56</span><span>▮▮▮ ⬤</span></div>
+        <div class="wheel-head">
+          <button class="back" id="backBtn" aria-label="Назад"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <span class="wh-title">Колесо бонусов</span>
+          <span class="wh-spins">Вращений: <b id="spinCount">1</b></span>
+        </div>
+        <p class="wheel-sub">Вращение начисляется за каждое выполненное задание</p>
+        <div class="elig" id="elig">✓ Нет отказов 14 дней — колесо доступно</div>
+        <div class="wheelbox">
+          <div class="pointer"></div>
+          <canvas id="wheel" width="640" height="640" style="width:320px;height:320px" role="img" aria-label="Колесо с восемью бонусами"></canvas>
+          <div class="hub">РР</div>
+        </div>
+        <div class="wheel-cta-box"><button class="cta" id="spinBtn">Крутить колесо</button></div>
+        <p class="hint" id="hint">Колесо доступно, пока вы принимаете задания без отказов</p>
+        <div class="status" id="status"></div>
+      </div>
+
+      <!-- ШТОРКА РЕЗУЛЬТАТА -->
+      <div class="sheet" id="sheet">
+        <div class="sheet-card">
+          <div class="prize-tag" id="prizeTag">Ваш бонус</div>
+          <div class="prize-name" id="prizeName"></div>
+          <p class="prize-desc" id="prizeDesc"></p>
+          <p class="prize-note" id="prizeNote">Напоминаем: колесо доступно, пока вы принимаете задания без отказов. Отказ от принятого задания заморозит колесо на 7 дней, накопленные вращения сгорят.</p>
+          <button class="cta" id="claimBtn">Забрать бонус</button>
+          <button class="ghost" id="declineBtn">Отказаться от бонуса</button>
+        </div>
+      </div>
+
+    </div></div>
+  </div>
+
+  <div class="spec">
+    <h3>Схема размещения</h3>
+    <div class="tablebox"><table>
+      <tr><th>Точка</th><th>Роль</th><th>Когда</th></tr>
+      <tr><td><b>Экран «Задание выполнено»</b></td><td>Главная точка конверсии — момент награды</td><td>Сразу после закрытия задания</td></tr>
+      <tr><td>Раздел «Акции и бонусы»</td><td>Постоянный «дом» колеса</td><td>Всегда</td></tr>
+      <tr><td>Плашка на главной</td><td>Напоминание</td><td>Только при неиспользованном вращении</td></tr>
+      <tr><td>Бейдж на карточке раздела</td><td>Пассивное напоминание</td><td>При неиспользованном вращении</td></tr>
+      <tr><td>Кружок в «Историях»</td><td>Анонс запуска</td><td>Первые 2–3 недели</td></tr>
+      <tr><td>Пуш «вращение сгорит через 3 дня»</td><td>Возврат в приложение</td><td>За 3 дня до сгорания</td></tr>
+    </table></div>
+    <p>Само колесо на главной не живёт: главная продаёт основную воронку (Подработка → взятое задание), постоянный блок выгорает в баннерную слепоту, а казино-механика на витрине — риск при модерации сторов. На главной — только триггеры, и только когда есть что крутить.</p>
+
+    <h3>Экономика колеса при марже 800 ₽ с задания</h3>
+    <div class="tablebox"><table>
+      <tr><th>Бонус</th><th>Тип затрат</th><th>Вес</th><th>Ожид. стоимость</th></tr>
+      <tr><td>+50 баллов рейтинга</td><td>бесплатный</td><td class="num">28%</td><td class="num">0 ₽</td></tr>
+      <tr><td>Значок «Топ-исполнитель» 7 дн</td><td>бесплатный</td><td class="num">14%</td><td class="num">0 ₽</td></tr>
+      <tr><td>Двойные баллы рейтинга 3 дня</td><td>бесплатный</td><td class="num">13%</td><td class="num">0 ₽</td></tr>
+      <tr><td>+100 ₽ к след. выплате</td><td>денежный</td><td class="num">12%</td><td class="num">12 ₽</td></tr>
+      <tr><td>Ещё одно вращение</td><td>служебный</td><td class="num">12%</td><td class="num">0 ₽ (даёт доп. шанс)</td></tr>
+      <tr><td>+100 баллов рейтинга</td><td>бесплатный</td><td class="num">11%</td><td class="num">0 ₽</td></tr>
+      <tr><td>Звезда РР — сторис недели</td><td>бесплатный</td><td class="num">7%</td><td class="num">0 ₽</td></tr>
+      <tr><td>Джекпот +1000 ₽ к след. выплате</td><td>денежный</td><td class="num">3%</td><td class="num">30 ₽</td></tr>
+      <tr><td><b>Итого на 1 вращение</b></td><td>—</td><td class="num">100%</td><td class="num"><b>≈ 48 ₽ (6,0% маржи)</b></td></tr>
+    </table></div>
+    <ul>
+      <li><b>85% колеса — бесплатные секторы.</b> Денежных два: +100 ₽ (12%) и джекпот (3%). Всё остальное построено на том, что в продукте уже есть: рейтинг, значки, сторисы, счётчик вращений.</li>
+      <li><b>«Двойные баллы рейтинга 3 дня»</b> — множитель к существующему начислению баллов. Бесплатен и заодно мотивирует брать больше заданий, пока действует.</li>
+      <li><b>«Звезда РР»</b> — фото и история исполнителя в сторис приложения. Ноль разработки: сторисы уже управляются из CRM, маркетолог раз в неделю собирает победителей. Для аудитории это сильный приз — признание, которое видят все коллеги.</li>
+      <li><b>Про «Ещё одно вращение»:</b> сам сектор бесплатный. Он не добавляет расхода напрямую — он добавляет ещё один прокрут, который с той же вероятностью может попасть на денежный сектор. Поэтому в расчёте среднего он учитывается формулой «база / (1 − вес сектора)», а не своей ценой.</li>
+      <li><b>Окупаемость через отказы:</b> бонус действует ~3 задания. Чтобы отбить 48 ₽, достаточно снизить вероятность отказа на ~2 п.п. на задание. Плюс сверху — рост числа заданий на исполнителя.</li>
+    </ul>
+
+    <h3>Ещё варианты призов для ротации</h3>
+    <ul>
+      <li><b>Мерч РР</b> (перчатки, футболка, термокружка) — себестоимость 200–500 ₽, работает как ходячая реклама на объектах. Выдача через пункт/доставку — нужен процесс.</li>
+      <li><b>Мгновенная выплата без комиссии</b> — если в продукте есть вывод с комиссией: стоит только недополученной комиссии, воспринимается очень ценно.</li>
+      <li><b>Секретный бонус</b> — сектор-загадка, внутри любой из призов колеса: расход не меняется, интрига растёт.</li>
+      <li><b>Фрагменты приза</b> («собери 5 частей — получи 3 000 ₽») — сильный удерживающий цикл, но требует отдельной разработки; на вторую итерацию.</li>
+      <li><b>Грамота «Лучший исполнитель недели»</b> — пуш + красивая карточка в профиле, бесплатно.</li>
+    </ul>
+
+    <h3>Когда показывать колесо</h3>
+    <ul>
+      <li><b>Момент зачисления выплаты</b> — пик лояльности, максимальная конверсия в согласие «без отказов».</li>
+      <li><b>Вечер вс–чт, 18:00–21:00</b> — пуши и плашка в момент, когда исполнители выбирают смены на завтра.</li>
+      <li><b>Спящим (7+ дней без заданий)</b> — подарочное вращение как реактивация: дешевле, чем платно возвращать.</li>
+      <li><b>Перед пиками спроса</b> (сезон, крупный клиент открыл много смен) — временно поднять веса денежных секторов: колесо работает рычагом управления предложением.</li>
+      <li><b>Исполнителям с высоким процентом отказов</b> — показывать активнее: условие «без отказов» с них ценнее всего.</li>
+      <li><b>Не показывать:</b> во время активного задания и сразу после спора или штрафа.</li>
+    </ul>
+
+    <h3>Механика (по гипотезе команды)</h3>
+    <ul>
+      <li><b>1 вращение</b> за выполненное и закрытое без спора задание, копятся до 5, сгорают через 30 дней.</li>
+      <li><b>Гейт вместо обязательства:</b> колесо доступно только исполнителям без отказов. Отказ от принятого задания замораживает колесо на 7 дней и сжигает накопленные вращения. Чекбокс согласия не нужен — участие добровольное, это право, а не обязательство. Психологически так сильнее: терять уже накопленное больнее, чем не получить новое (loss aversion).</li>
+      <li><b>Результат считает бэкенд</b> до старта анимации — клиент только показывает.</li>
+      <li>Форс-мажор — отмена через поддержку по уважительной причине: заморозку не включает, но требует подтверждения оператора.</li>
+      <li>Новичкам: анонс в онбординге «выполни первое задание — крути колесо».</li>
+    </ul>
+
+    <h3>Метрики успеха</h3>
+    <ul>
+      <li><b>Главная (по гипотезе): D30 retention исполнителей +10% относительно baseline.</b> Baseline замеряется до запуска на когортах за 3 месяца — детали на вкладке «Эксперимент» в CRM.</li>
+      <li><b>Δ процента отказов от заданий</b> — вторая ключевая: ради неё построен гейт «без отказов — есть доступ».</li>
+      <li>Поддерживающие: доля использованных вращений, задания на исполнителя, ROI акции.</li>
+    </ul>
+
+    <h3>Для интеграции в код нужно</h3>
+    <ul>
+      <li>Доступ к репозиторию приложения и стек (нативный / Flutter / React Native).</li>
+      <li>Точные цвета и шрифт брендбука — сейчас палитра снята со скриншотов, всё в токенах в начале файла.</li>
+      <li>Подтверждённый бизнесом список бонусов и веса; текст оферты от юриста.</li>
+    </ul>
+
+    <p class="note">В текстах приложения — «Колесо бонусов», не «рулетка/казино»: исполнитель ничего не ставит, это программа наград за работу. Так меньше вопросов от модерации Google Play и App Store.</p>
+  </div>
+</div>
+
+<!-- ═══ КАБИНЕТ МАРКЕТОЛОГА В CRM ═══ -->
+<section class="crm-sec">
+  <div class="eyebrow">Кабинет маркетолога · Handswork CRM</div>
+  <h1>Управление колесом и аналитика акции</h1>
+  <p class="lede">Страница «Колесо бонусов» внутри раздела Акции. Вкладка «Настройка» — живой калькулятор: меняйте веса и суммы, бюджет вращения и доля маржи пересчитаются сразу. Вкладка «Аналитика» — эффективность акции за 30 дней (демо-данные).</p>
+
+  <div class="crm-scroll"><div class="crm">
+    <div class="crm-top">
+      <span>⁘ Handswork CRM</span>
+      <span class="r"><span>Чеков: 4 | Статусов: 0</span><span>🔔</span></span>
+    </div>
+    <div class="crm-body">
+      <nav class="crm-side">
+        <div class="crm-user"><b>Ирина Зараева</b><span>+7 (926) 214-47-76</span></div>
+        <div class="it">Этапы</div>
+        <div class="it">Исполнители</div>
+        <div class="it">Риски бизнеса</div>
+        <div class="it">Рекрутинг исполнителей</div>
+        <div class="it">Выгрузки</div>
+        <div class="it" style="font-weight:600;color:#2374D5">Управление приложением</div>
+        <div class="it sub on">Акции</div>
+        <div class="it sub">Оповещения</div>
+        <div class="it sub">Сторисы</div>
+      </nav>
+      <div class="crm-main">
+        <div class="crumb">Управление приложением / Акции / <b>Колесо бонусов</b></div>
+        <div class="crm-title">
+          <h4>🎡 Колесо бонусов</h4>
+          <span class="pill g">Активна</span>
+          <span class="crm-dates">00:00 01.06.2026 — 23:59 31.08.2026</span>
+        </div>
+        <div class="crm-tabs">
+          <button class="ctab on" id="tabA" type="button">Аналитика</button>
+          <button class="ctab" id="tabS" type="button">Настройка</button>
+          <button class="ctab" id="tabE" type="button">Эксперимент</button>
+        </div>
+
+        <!-- АНАЛИТИКА -->
+        <div class="cpanel on" id="panelA">
+          <div class="psel-row">
+            <label for="perSel">Период:</label>
+            <select class="psel" id="perSel">
+              <option value="7">Последние 7 дней</option>
+              <option value="30" selected>Последние 30 дней</option>
+              <option value="all">Весь период акции</option>
+            </select>
+            <span class="per-dates" id="perDates">06.06.2026 — 06.07.2026</span>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><label>Вращений использовано</label><div class="v" id="kSpins">9 340</div><div class="d mut" id="kSpinsSub">75% от начисленных</div></div>
+            <div class="kpi"><label>Отказы от заданий</label><div class="v" id="kRef">7,6%</div><div class="d up" id="kRefSub">−3,6 п.п. к контролю (11,2%)</div></div>
+            <div class="kpi"><label>Расход на бонусы</label><div class="v" id="kCost">348 400 ₽</div><div class="d mut" id="kCostSub">два денежных сектора</div></div>
+            <div class="kpi"><label>ROI акции</label><div class="v" id="kRoi">×6,0</div><div class="d up" id="kRoiSub">эффект 2,10 млн ₽</div></div>
+          </div>
+          <details class="dev-note" style="margin:0 0 16px">
+            <summary>ⓘ Для разработчиков: как считаются метрики аналитики</summary>
+            <p><b>Вращений использовано</b> — количество событий «прокрут» с датой в выбранном периоде; доля = прокруты / начисленные вращения за тот же период.</p>
+            <p><b>Отказы от заданий</b> — по группе исполнителей с доступом к колесу: отказы от принятых заданий / принятые задания за период. <b>Контроль</b> — holdout-группа ~10% исполнителей, которым колесо не показывается и вращения не начисляются (обязательно: сравнение «крутившие vs некрутившие» смещено — лояльные крутят чаще и сами по себе реже отказываются).</p>
+            <p><b>Расход</b> — сумма фактически начисленных денежных бонусов с датой начисления в периоде (не по дате выпадения сектора: деньги платятся со следующим заданием, начисление может попасть в другой период).</p>
+            <p><b>ROI</b> = (экономия на отказах + маржа доп. заданий) / расход.<br>
+            <code>Экономия = Δ отказов (п.п.) × задания под бонусом × маржа задания</code><br>
+            <code>Доп. задания = (заданий/исп. в тесте − в контроле) × исполнителей в тесте × маржа</code></p>
+          </details>
+
+          <div class="funnel">
+            <div class="fr"><span class="fl">Вращений начислено (= заданий)</span><div class="fbar" style="width:100%" id="f1">12 480</div><span class="fp" id="f1p">100%</span></div>
+            <div class="fr"><span class="fl">Крутили колесо</span><div class="fbar" style="width:75%" id="f2">9 340</div><span class="fp" id="f2p">75%</span></div>
+            <div class="fr"><span class="fl">Забрали бонус</span><div class="fbar" style="width:63%" id="f3">7 850</div><span class="fp" id="f3p">84% от крутивших</span></div>
+          </div>
+
+          <div class="charts">
+            <div class="chart-card">
+              <h5 id="lineTitle">Отказы от заданий по неделям, %</h5>
+              <canvas id="chLine" width="1040" height="440" style="width:100%;max-width:520px;height:auto"></canvas>
+              <div class="legend"><span><i style="background:#2374D5"></i>Активировали бонус</span><span><i style="background:#C3CAD6"></i>Контрольная группа</span></div>
+            </div>
+            <div class="chart-card">
+              <h5 id="barTitle">Заданий на исполнителя за период</h5>
+              <canvas id="chBar" width="560" height="440" style="width:100%;max-width:280px;height:auto"></canvas>
+              <div class="legend"><span><i style="background:#C3CAD6"></i>Не крутили</span><span><i style="background:#2374D5"></i>Крутили</span></div>
+            </div>
+          </div>
+
+          <table class="ct">
+            <tr><th>Бонус</th><th class="num">Выпадений</th><th class="num">Активировано</th><th class="num">Расход</th><th class="num">Отказы в период бонуса</th></tr>
+            <tr><td>+50 баллов рейтинга</td><td class="num">2 615</td><td class="num">88%</td><td class="num">0 ₽</td><td class="num">8,1%</td></tr>
+            <tr><td>Значок «Топ-исполнитель»</td><td class="num">1 308</td><td class="num">74%</td><td class="num">0 ₽</td><td class="num">8,3%</td></tr>
+            <tr><td>Двойные баллы рейтинга 3 дня</td><td class="num">1 214</td><td class="num">92%</td><td class="num">0 ₽</td><td class="num">7,3%</td></tr>
+            <tr><td>+100 ₽ к след. выплате</td><td class="num">1 121</td><td class="num">86%</td><td class="num">96 400 ₽</td><td class="num">7,7%</td></tr>
+            <tr><td>Ещё одно вращение</td><td class="num">1 121</td><td class="num">100%</td><td class="num">0 ₽</td><td class="num">—</td></tr>
+            <tr><td>+100 баллов рейтинга</td><td class="num">1 027</td><td class="num">90%</td><td class="num">0 ₽</td><td class="num">7,9%</td></tr>
+            <tr><td>Звезда РР — сторис недели</td><td class="num">654</td><td class="num">68%</td><td class="num">0 ₽</td><td class="num">7,8%</td></tr>
+            <tr><td>Джекпот +1000 ₽ к след. выплате</td><td class="num">280</td><td class="num">90%</td><td class="num">252 000 ₽</td><td class="num">6,4%</td></tr>
+          </table>
+          <details class="dev-note">
+            <summary>ⓘ Для разработчиков: как считается таблица по бонусам</summary>
+            <p><b>Выпадений</b> — события «сектор выпал» за период. <b>Активировано</b> — доля выпадений, где исполнитель забрал приз (не нажал «Отказаться от бонуса»); у «Ещё одного вращения» всегда 100%. <b>Расход</b> — фактические начисления по денежным бонусам этого сектора за период. <b>Отказы в период бонуса</b> — процент отказов от принятых заданий, пока действовал именно этот бонус; сравнивая столбец между секторами, видно, какой приз сильнее удерживает.</p>
+          </details>
+        </div>
+
+        <!-- НАСТРОЙКА -->
+        <div class="cpanel" id="panelS">
+          <div class="params">
+            <div class="param"><label>Маржа с задания, ₽</label><input id="pMargin" type="number" value="800"></div>
+            <div class="param"><label>Вращений за задание</label><input type="number" value="1"></div>
+            <div class="param"><label>Копятся до</label><input type="number" value="5"></div>
+            <div class="param"><label>Сгорают через, дней</label><input type="number" value="30"></div>
+            <div class="param"><label>Заморозка после отказа, дней</label><input type="number" value="7"></div>
+          </div>
+          <table class="ct" id="cfgTable">
+            <tr><th>Сектор</th><th>Тип</th><th class="num">Вес, %</th><th class="num">Стоимость выпадения, ₽</th><th class="num">Ожид. стоимость</th></tr>
+          </table>
+          <p class="col-hint"><b>Стоимость выпадения</b> — сколько платим, когда сектор реально выпал (номинал приза). <b>Ожидаемая стоимость</b> — вклад сектора в среднюю цену одного вращения: стоимость выпадения × вес. Пример: джекпот 1 000 ₽ выпадает в 3% случаев → в среднем добавляет 30 ₽ к каждому вращению.</p>
+          <div class="totals">
+            <div class="tot"><label>Сумма весов</label><b id="tW">100%</b></div>
+            <div class="tot"><label>Бюджет на вращение</label><b id="tEV">— ₽</b></div>
+            <div class="tot"><label>Доля маржи</label><b id="tPct">—%</b></div>
+            <div class="tot"><label>Прогноз расхода за месяц</label><b id="tFor">— ₽</b></div>
+          </div>
+          <details class="dev-note">
+            <summary>ⓘ Для разработчиков: зачем поле «Маржа» и как считать прогноз за месяц</summary>
+            <p><b>Маржа с задания</b> — справочный параметр кабинета, в приложение не передаётся и на выдачу бонусов не влияет. Нужен для одного: показать «Долю маржи» = бюджет вращения / маржа. Это предохранитель — маркетолог сразу видит, какую часть заработка платформы с одного задания съедает акция (подсветка красным при доле выше 12%). Значение обновляется вручную при изменении экономики.</p>
+            <p><b>Прогноз расхода за месяц</b> считается только из данных, уже видимых в CRM:<br>
+            <code>Прогноз = N × U × A × EV + Σ фондов</code><br>
+            где <code>N</code> — вращений начислено за последние 30 дней (вкладка «Аналитика», в демо 12 480 = числу выполненных заданий); <code>U</code> — доля использованных вращений (75%); <code>A</code> — доля активированных бонусов (84%, деньги платятся только активировавшим); <code>EV</code> — бюджет на вращение из этого калькулятора (<span id="fEV">—</span> ₽); <code>Σ фондов</code> — фиксированные призовые фонды, если такие секторы появятся (<span id="fFunds">—</span> ₽/мес), они не зависят от числа вращений.<br>
+            В демо: 12 480 × 0,75 × 0,84 × EV + фонды. Для первого месяца, пока своей статистики нет, N берётся из числа выполненных заданий за прошлый месяц, U и A — консервативно 80% и 90%.</p>
+            <p><b>Сектор «Ещё одно вращение»</b> сам бесплатный, но добавляет прокрут, который может попасть на денежный сектор. Поэтому в бюджете вращения он учитывается рекурсией: <code>EV = база / (1 − вес_ещё_раз)</code>, а не собственной ценой.</p>
+          </details>
+        </div>
+
+        <!-- ЭКСПЕРИМЕНТ -->
+        <div class="cpanel" id="panelE">
+          <div class="hyp"><b>Гипотеза.</b> Исполнители имеют проблему слабой мотивации не отказываться от заданий. Если запустить колесо бонусов, участие в котором доступно только при отсутствии отказов, то retention (% исполнителей, оставшихся активными через N дней) вырастет на <b>+10% относительно baseline</b>, потому что исполнители получат регулярный игровой стимул оставаться активными и принимать задания без отказов.</div>
+          <div class="kpis">
+            <div class="kpi"><label>Baseline D30 retention</label><div class="v">34,0%</div><div class="d mut">когорты марта–мая 2026</div></div>
+            <div class="kpi"><label>Цель (+10% отн.)</label><div class="v">≥ 37,4%</div><div class="d mut">D30 тестовой группы</div></div>
+            <div class="kpi"><label>Текущий D30 теста</label><div class="v">38,1%</div><div class="d up">+12,1% к baseline</div></div>
+            <div class="kpi"><label>Срок эксперимента</label><div class="v">8 недель</div><div class="d mut">идёт 5-я неделя</div></div>
+          </div>
+          <div class="charts" style="grid-template-columns:1fr">
+            <div class="chart-card">
+              <h5>Retention исполнителей: тест (видят колесо) vs контроль (holdout 10%)</h5>
+              <canvas id="chRet" width="1040" height="440" style="width:100%;max-width:520px;height:auto"></canvas>
+              <div class="legend"><span><i style="background:#C3CAD6"></i>Контроль</span><span><i style="background:#2374D5"></i>Тест</span><span><i style="background:#3DA75C"></i>Цель D30 = 37,4%</span></div>
+            </div>
+          </div>
+          <table class="ct">
+            <tr><th>Исход</th><th>Условие</th><th>Решение</th></tr>
+            <tr><td><b>Успех</b></td><td>D30 теста ≥ 37,4% (стат. значимо) и ROI ≥ 1</td><td>Раскатка на 100%, постоянный holdout 5% для мониторинга</td></tr>
+            <tr><td>Нейтрально</td><td>D30 вырос, но меньше +10% отн.</td><td>Итерация: веса, состав призов, момент показа — ещё 4 недели</td></tr>
+            <tr><td>Провал</td><td>D30 не отличается от контроля или ROI &lt; 1</td><td>Выключить колесо, разобрать по сегментам, где не сработало</td></tr>
+          </table>
+          <details class="dev-note">
+            <summary>ⓘ Для разработчиков: как считать retention и собрать эксперимент</summary>
+            <p><b>Когорта</b> — исполнители, выполнившие ≥ 1 задание в календарную неделю W. <b>Retention D<i>N</i></b> — доля когорты, выполнившая ≥ 1 задание в окне [W+N; W+N+7 дней]. <b>Baseline</b> — среднее D30 по когортам за 3 месяца до запуска; замерить до релиза и зафиксировать в карточке эксперимента.</p>
+            <p><b>Группы:</b> рандомизация по исполнителю (hash от id) при первом входе после релиза: 90% тест — видят колесо, 10% holdout — не видят и не получают вращений. Сравнивать только одновременные когорты теста и контроля, не «после vs до» — иначе сезонность (лето, вахтовые пики) исказит результат.</p>
+            <p><b>Критерий «+10%» — относительный:</b> baseline 34,0% → цель 34,0 × 1,1 = 37,4 п.п. Значимость — z-тест долей между тестом и контролем на когортах D30, порог p &lt; 0,05. Дополнительно следить за guardrail-метриками: отказы, задания на исполнителя, жалобы в поддержку на заморозку.</p>
+          </details>
+        </div>
+
+      </div>
+    </div>
+  </div></div>
+</section>
+</div>
+
+<script>
+(function(){
+  /* t: c=частый (бесплатный), r=редкий, e=эпик (денежный); r2=ещё вращение
+     ВСЕ денежные бонусы начисляются со СЛЕДУЮЩИМ выполненным заданием —
+     каждая выплата бонуса сопровождается новой маржой */
+  const SECTORS=[
+    {name:'+50 баллов рейтинга',short:'+50 баллов',desc:'Рейтинг вырастет сразу после активации.',w:28,t:'c',tier:'ЧАСТЫЙ БОНУС'},
+    {name:'+100 ₽ к выплате',short:'+100 ₽',desc:'Начислим вместе с выплатой за следующее выполненное задание.',w:12,t:'r',tier:'РЕДКИЙ БОНУС'},
+    {name:'Значок «Топ-исполнитель»',short:'Топ-статус',desc:'Значок в профиле на 7 дней — вас выбирают чаще.',w:14,t:'c',tier:'ЧАСТЫЙ БОНУС'},
+    {name:'Двойные баллы рейтинга',short:'Баллы ×2',desc:'Баллы рейтинга за выполненные задания начисляются в двойном размере 3 дня.',w:13,t:'e',tier:'РЕДКИЙ БОНУС'},
+    {name:'+100 баллов рейтинга',short:'+100 баллов',desc:'Рейтинг вырастет сразу после активации.',w:11,t:'c',tier:'ЧАСТЫЙ БОНУС'},
+    {name:'Звезда РР',short:'Звезда РР',desc:'Ваше фото и история попадут в сторис приложения на этой неделе.',w:7,t:'r',tier:'ЗВЕЗДА РР'},
+    {name:'Ещё одно вращение',short:'Ещё раз!',desc:'Вращение вернулось на счёт — крутите ещё раз!',w:12,t:'c',respin:true,tier:'ЕЩЁ РАЗ!'},
+    {name:'Джекпот +1000 ₽',short:'+1000 ₽',desc:'Начислим вместе с выплатой за следующее выполненное задание.',w:3,t:'e',tier:'ДЖЕКПОТ'}
+  ];
+  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const $=id=>document.getElementById(id);
+  const cv=$('wheel'),ctx=cv.getContext('2d');
+  const N=SECTORS.length,SEG=2*Math.PI/N,R=310,C=320;
+  let angle=0,spinning=false,spins=1,bonusActive=false,bonusUntil='',frozen=false,frozenUntil='';
+
+  function draw(a){
+    ctx.clearRect(0,0,640,640);
+    ctx.save();ctx.translate(C,C);ctx.rotate(a);
+    for(let i=0;i<N;i++){
+      const start=i*SEG-Math.PI/2-SEG/2;
+      const s=SECTORS[i],jackpot=i===7;
+      ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R,start,start+SEG);ctx.closePath();
+      ctx.fillStyle=jackpot?css('--navy'):s.t==='e'?css('--orange'):s.t==='r'?css('--sky-soft'):'#FFFFFF';
+      ctx.fill();
+      ctx.strokeStyle=css('--navy');ctx.lineWidth=3;ctx.stroke();
+      ctx.save();ctx.rotate(i*SEG);
+      ctx.fillStyle=jackpot?'#FFFFFF':css('--navy');
+      ctx.font='700 24px -apple-system,"Segoe UI",system-ui,sans-serif';
+      ctx.textAlign='center';
+      ctx.translate(0,-R+68);
+      const words=s.short.split(' ');
+      words.forEach((w,j)=>ctx.fillText(w,0,j*28-(words.length-1)*14));
+      ctx.restore();
+    }
+    ctx.beginPath();ctx.arc(0,0,R,0,7);ctx.strokeStyle=css('--navy');ctx.lineWidth=8;ctx.stroke();
+    ctx.beginPath();ctx.arc(0,0,R+7,0,7);ctx.strokeStyle=css('--sky');ctx.lineWidth=3;ctx.stroke();
+    ctx.restore();
+  }
+  draw(0);
+
+  /* ── навигация ── */
+  const views={done:'vDone',home:'vHome',wheel:'vWheel'};
+  const steps={done:'stDone',home:'stHome',wheel:'stWheel'};
+  function show(name){
+    Object.values(views).forEach(v=>$(v).classList.remove('on'));
+    Object.values(steps).forEach(s=>$(s).classList.remove('on'));
+    $(views[name]).classList.add('on');
+    $(steps[name]).classList.add('on');
+    if(name==='home')renderHome();
+  }
+  function renderHome(){
+    $('spinBanner').classList.toggle('on',spins>0&&!bonusActive&&!frozen);
+    $('cardDot').classList.toggle('on',spins>0&&!frozen);
+    $('cardDot').textContent=spins;
+    const bb=$('bonusBanner');
+    if(bonusActive&&!frozen){
+      bb.textContent='✓ Бонус активен до '+bonusUntil;
+      bb.classList.add('on');
+    } else bb.classList.remove('on');
+    const fb=$('frozenBanner');
+    if(frozen){
+      fb.textContent='✕ Колесо заморожено до '+frozenUntil+' — вы отказались от принятого задания';
+      fb.classList.add('on');
+    } else fb.classList.remove('on');
+  }
+  function renderWheel(){
+    const el=$('elig');
+    if(frozen){
+      el.className='elig frozen';
+      el.textContent='✕ Заморожено до '+frozenUntil+' — отказ от задания. Вращения сгорели';
+      $('spinBtn').disabled=true;
+      $('hint').textContent='Доступ вернётся автоматически, если до '+frozenUntil+' не будет новых отказов';
+    } else {
+      el.className='elig';
+      el.textContent='✓ Нет отказов 14 дней — колесо доступно';
+    }
+  }
+  $('doneSpin').addEventListener('click',()=>show('wheel'));
+  $('doneLater').addEventListener('click',()=>show('home'));
+  $('spinBanner').addEventListener('click',()=>show('wheel'));
+  $('frozenBanner').addEventListener('click',()=>show('wheel'));
+  $('bonusCard').addEventListener('click',()=>show('wheel'));
+  $('backBtn').addEventListener('click',()=>show('home'));
+  /* чипы-шаги над телефоном тоже переключают экраны */
+  $('stDone').addEventListener('click',()=>show('done'));
+  $('stHome').addEventListener('click',()=>show('home'));
+  $('stWheel').addEventListener('click',()=>show('wheel'));
+  $('resetBtn').addEventListener('click',()=>{
+    spins=1;bonusActive=false;spinning=false;frozen=false;angle=0;draw(0);
+    $('spinCount').textContent=spins;
+    $('spinBtn').disabled=false;
+    $('status').classList.remove('on');
+    $('hint').textContent='Колесо доступно, пока вы принимаете задания без отказов';
+    $('sheet').classList.remove('open');
+    renderWheel();
+    show('done');
+  });
+  /* демо: отказ от принятого задания — гейт гипотезы */
+  $('simRef').addEventListener('click',()=>{
+    frozen=true;spinning=false;
+    spins=0;$('spinCount').textContent=spins;
+    frozenUntil=new Date(Date.now()+7*864e5).toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+    $('sheet').classList.remove('open');
+    $('status').classList.remove('on');
+    renderWheel();
+    show('wheel');
+  });
+
+  /* ── вращение ── */
+  function pickWeighted(){
+    const total=SECTORS.reduce((s,x)=>s+x.w,0);
+    let r=Math.random()*total;
+    for(let i=0;i<N;i++){r-=SECTORS[i].w;if(r<=0)return i;}
+    return N-1;
+  }
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $('spinBtn').addEventListener('click',()=>{
+    if(spinning||spins<1||frozen)return;
+    spinning=true;spins--;$('spinCount').textContent=spins;
+    $('spinBtn').disabled=true;
+    const win=pickWeighted();                    // в проде: ответ бэкенда
+    const target=2*Math.PI*6-win*SEG+(Math.random()-.5)*SEG*.6;
+    const from=angle%(2*Math.PI),dur=reduced?300:4200,t0=performance.now();
+    function frame(t){
+      const p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,4);
+      angle=from+(target-from)*e;draw(angle);
+      if(p<1)requestAnimationFrame(frame);
+      else{spinning=false;showPrize(win);}
+    }
+    requestAnimationFrame(frame);
+  });
+  let cur=null;
+  function showPrize(i){
+    const s=SECTORS[i];cur=s;
+    $('prizeTag').textContent=s.tier;
+    $('prizeName').textContent=s.name;
+    $('prizeDesc').textContent=s.desc;
+    const re=!!s.respin;
+    $('prizeNote').style.display=re?'none':'block';
+    $('declineBtn').style.display=re?'none':'block';
+    $('claimBtn').textContent=re?'Крутить ещё раз':'Забрать бонус';
+    $('sheet').classList.add('open');
+  }
+  $('claimBtn').addEventListener('click',()=>{
+    $('sheet').classList.remove('open');
+    if(cur&&cur.respin){
+      spins++;$('spinCount').textContent=spins;
+      afterSpin();
+      return;
+    }
+    bonusActive=true;
+    bonusUntil=new Date(Date.now()+7*864e5).toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+    $('status').textContent='✓ Бонус активен до '+bonusUntil;
+    $('status').classList.add('on');
+    afterSpin();
+  });
+  $('declineBtn').addEventListener('click',()=>{
+    $('sheet').classList.remove('open');
+    afterSpin();
+  });
+  function afterSpin(){
+    if(spins<1){
+      $('spinBtn').disabled=true;
+      $('hint').textContent='Новое вращение — за следующее выполненное задание';
+    } else $('spinBtn').disabled=false;
+  }
+
+  show('done');
+})();
+</script>
+
+<script>
+/* ═══ CRM: вкладки, калькулятор, графики ═══ */
+(function(){
+  const $=id=>document.getElementById(id);
+
+  /* вкладки */
+  function tab(k){
+    ['A','S','E'].forEach(x=>{
+      $('tab'+x).classList.toggle('on',x===k);
+      $('panel'+x).classList.toggle('on',x===k);
+    });
+  }
+  $('tabA').addEventListener('click',()=>tab('A'));
+  $('tabS').addEventListener('click',()=>tab('S'));
+  $('tabE').addEventListener('click',()=>tab('E'));
+
+  /* калькулятор настройки: cost = стоимость при выпадении с учётом активации/вероятности */
+  const CFG=[
+    {n:'+50 баллов рейтинга',t:'free',w:28,cost:0},
+    {n:'+100 ₽ к след. выплате',t:'cash',w:12,cost:100},
+    {n:'Значок «Топ-исполнитель» 7 дн',t:'free',w:14,cost:0},
+    {n:'Двойные баллы рейтинга 3 дня',t:'free',w:13,cost:0},
+    {n:'+100 баллов рейтинга',t:'free',w:11,cost:0},
+    {n:'Звезда РР — сторис недели',t:'free',w:7,cost:0},
+    {n:'Ещё одно вращение',t:'respin',w:12,cost:0},
+    {n:'Джекпот +1000 ₽ к след. выплате',t:'cash',w:3,cost:1000}
+  ];
+  const TAGS={free:['free','бесплатный'],respin:['cond','ещё вращение'],fund:['cash','фикс. фонд'],cash:['cash','денежный']};
+  const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+  const tbl=$('cfgTable');
+  CFG.forEach((s,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+s.n+'</td>'+
+      '<td><span class="tag '+TAGS[s.t][0]+'">'+TAGS[s.t][1]+'</span></td>'+
+      '<td class="num"><input type="number" min="0" max="100" value="'+s.w+'" data-i="'+i+'" data-f="w"></td>'+
+      '<td class="num">'+(s.t==='free'||s.t==='respin'?'—':
+        '<input type="number" min="0" value="'+s.cost+'" data-i="'+i+'" data-f="cost">'+(s.t==='fund'?' <span style="font-size:10.5px;color:#8A93A6">₽/мес</span>':''))+'</td>'+
+      '<td class="num" id="ev'+i+'">—</td>';
+    tbl.appendChild(tr);
+  });
+  function recalc(){
+    const margin=parseFloat($('pMargin').value)||800;
+    /* «ещё вращение» — рекурсия: итог = база / (1 − вес_ещёраз);
+       fund-секторы (розыгрыш) в цену вращения не входят — это фикс. фонд за месяц */
+    let sumW=0,base=0,wr=0,funds=0;
+    CFG.forEach(s=>{
+      sumW+=s.w;
+      if(s.t==='respin')wr+=s.w;
+      else if(s.t==='fund')funds+=s.cost;
+      else base+=s.w/100*s.cost;
+    });
+    const total=wr<100?base/(1-wr/100):base;
+    CFG.forEach((s,i)=>{
+      const cell=$('ev'+i);
+      if(s.t==='respin')cell.textContent=(total-base)>0.5?'+'+fmt(total-base)+' ₽ (доп. шанс)':'0 ₽';
+      else if(s.t==='fund')cell.textContent='фонд/мес';
+      else{const e=s.w/100*s.cost;cell.textContent=e?fmt(e)+' ₽':'0 ₽';}
+    });
+    const wEl=$('tW');
+    wEl.textContent=sumW+'%';
+    wEl.className=sumW===100?'ok':'bad';
+    $('tEV').textContent=fmt(total)+' ₽';
+    const pct=total/margin*100;
+    const pEl=$('tPct');
+    pEl.textContent=pct.toFixed(1)+'%';
+    pEl.className=pct<=12?'ok':'bad';
+    /* прогноз за месяц: N начисленных вращений за прошлые 30 дней (аналитика) ×
+       доля использованных × доля активаций × бюджет вращения + фикс. фонды */
+    const M={earned:12480,use:.75,act:.84};
+    $('tFor').textContent=fmt(M.earned*M.use*M.act*total+funds)+' ₽';
+    $('fEV').textContent=fmt(total);
+    $('fFunds').textContent=fmt(funds);
+  }
+  tbl.addEventListener('input',e=>{
+    const i=e.target.dataset.i,f=e.target.dataset.f;
+    if(i==null)return;
+    CFG[i][f]=parseFloat(e.target.value)||0;
+    recalc();
+  });
+  $('pMargin').addEventListener('input',recalc);
+  recalc();
+
+  /* ── аналитика по периодам (демо-данные) ── */
+  const PERIODS={
+    '7':{
+      dates:'29.06.2026 — 06.07.2026',
+      kpi:{spins:'2 210',spinsSub:'75% от начисленных',ref:'7,4%',refSub:'−3,8 п.п. к контролю (11,2%)',cost:'81 200 ₽',costSub:'два денежных сектора',roi:'×6,0',roiSub:'эффект 489 000 ₽'},
+      funnel:[['2 950','100%',100],['2 210','75%',75],['1 860','84% от крутивших',63]],
+      lineTitle:'Отказы от заданий по дням, %',
+      line:{labels:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],test:[7.9,7.7,7.6,7.4,7.2,7.5,7.4],ctrl:[11.1,11.3,11.0,11.2,11.4,11.2,11.1]},
+      barTitle:'Заданий на исполнителя за 7 дней',
+      bars:[{v:1.4,l:'1,4'},{v:1.7,l:'1,7'}]
+    },
+    '30':{
+      dates:'06.06.2026 — 06.07.2026',
+      kpi:{spins:'9 340',spinsSub:'75% от начисленных',ref:'7,6%',refSub:'−3,6 п.п. к контролю (11,2%)',cost:'348 400 ₽',costSub:'два денежных сектора',roi:'×6,0',roiSub:'эффект 2,10 млн ₽'},
+      funnel:[['12 480','100%',100],['9 340','75%',75],['7 850','84% от крутивших',63]],
+      lineTitle:'Отказы от заданий по неделям, %',
+      line:{labels:['Н1','Н2','Н3','Н4','Н5'],test:[11.2,9.8,8.9,8.1,7.6],ctrl:[11.3,11.0,11.4,11.1,11.2]},
+      barTitle:'Заданий на исполнителя за 30 дней',
+      bars:[{v:6.2,l:'6,2'},{v:7.1,l:'7,1'}]
+    },
+    'all':{
+      dates:'01.06.2026 — 06.07.2026 (36 дней)',
+      kpi:{spins:'11 230',spinsSub:'75% от начисленных',ref:'7,7%',refSub:'−3,5 п.п. к контролю (11,2%)',cost:'418 100 ₽',costSub:'два денежных сектора',roi:'×6,0',roiSub:'эффект 2,52 млн ₽'},
+      funnel:[['14 980','100%',100],['11 230','75%',75],['9 420','84% от крутивших',63]],
+      lineTitle:'Отказы от заданий по неделям, %',
+      line:{labels:['Н1','Н2','Н3','Н4','Н5','Н6'],test:[11.2,9.8,8.9,8.1,7.6,7.4],ctrl:[11.3,11.0,11.4,11.1,11.2,11.2]},
+      barTitle:'Заданий на исполнителя за весь период',
+      bars:[{v:7.3,l:'7,3'},{v:8.5,l:'8,5'}]
+    }
+  };
+
+  function drawLine(d){
+    const c=$('chLine'),x=c.getContext('2d');
+    const W=1040,H=440,pl=70,pr=20,pt=30,pb=60;
+    x.clearRect(0,0,W,H);
+    const yMin=6,yMax=12;
+    const X=i=>pl+i*(W-pl-pr)/(d.labels.length-1);
+    const Y=v=>pt+(yMax-v)/(yMax-yMin)*(H-pt-pb);
+    x.strokeStyle='#EDF0F3';x.lineWidth=2;x.fillStyle='#8A93A6';x.font='22px "Segoe UI",system-ui,sans-serif';
+    for(let v=6;v<=12;v+=2){
+      x.beginPath();x.moveTo(pl,Y(v));x.lineTo(W-pr,Y(v));x.stroke();
+      x.fillText(v+'%',14,Y(v)+8);
+    }
+    d.labels.forEach((w,i)=>{x.fillText(w,X(i)-14,H-18)});
+    function line(data,col){
+      x.strokeStyle=col;x.lineWidth=5;x.beginPath();
+      data.forEach((v,i)=>i?x.lineTo(X(i),Y(v)):x.moveTo(X(0),Y(v)));
+      x.stroke();
+      data.forEach((v,i)=>{x.beginPath();x.arc(X(i),Y(v),7,0,7);x.fillStyle=col;x.fill();});
+    }
+    line(d.ctrl,'#C3CAD6');line(d.test,'#2374D5');
+    const last=d.test[d.test.length-1];
+    x.fillStyle='#2374D5';x.font='700 22px "Segoe UI",system-ui,sans-serif';
+    x.fillText(String(last).replace('.',',')+'%',X(d.test.length-1)-64,Y(last)+40);
+  }
+
+  function drawBars(bars){
+    const c=$('chBar'),x=c.getContext('2d');
+    const H=440,pb=60,base=H-pb;
+    x.clearRect(0,0,560,H);
+    const maxV=Math.max(bars[0].v,bars[1].v)*1.25;
+    const cols=['#C3CAD6','#2374D5'];
+    bars.forEach((b,i)=>{
+      const bw=150,gap=90,x0=70+i*(bw+gap);
+      const h=b.v/maxV*(base-40);
+      x.fillStyle=cols[i];
+      x.beginPath();x.roundRect(x0,base-h,bw,h,[10,10,0,0]);x.fill();
+      x.fillStyle='#1C2333';x.font='700 30px "Segoe UI",system-ui,sans-serif';
+      x.fillText(b.l,x0+bw/2-24,base-h-14);
+    });
+    x.fillStyle='#8A93A6';x.font='22px "Segoe UI",system-ui,sans-serif';
+    x.fillText('Не крутили',80,H-20);x.fillText('Крутили',330,H-20);
+  }
+
+  function applyPeriod(key){
+    const p=PERIODS[key];
+    $('perDates').textContent=p.dates;
+    $('kSpins').textContent=p.kpi.spins;$('kSpinsSub').textContent=p.kpi.spinsSub;
+    $('kRef').textContent=p.kpi.ref;$('kRefSub').textContent=p.kpi.refSub;
+    $('kCost').textContent=p.kpi.cost;$('kCostSub').textContent=p.kpi.costSub;
+    $('kRoi').textContent=p.kpi.roi;$('kRoiSub').textContent=p.kpi.roiSub;
+    p.funnel.forEach((row,i)=>{
+      const bar=$('f'+(i+1));
+      bar.textContent=row[0];bar.style.width=row[2]+'%';
+      $('f'+(i+1)+'p').textContent=row[1];
+    });
+    $('lineTitle').textContent=p.lineTitle;
+    $('barTitle').textContent=p.barTitle;
+    drawLine(p.line);
+    drawBars(p.bars);
+  }
+  $('perSel').addEventListener('change',e=>applyPeriod(e.target.value));
+  applyPeriod('30');
+
+  /* график retention: тест vs контроль, цель по D30 */
+  (function(){
+    const c=$('chRet'),x=c.getContext('2d');
+    const W=1040,H=440,pb=70,base=H-pb;
+    const groups=[
+      {l:'D7',ctrl:58,test:63},
+      {l:'D14',ctrl:44,test:50},
+      {l:'D30',ctrl:34,test:38.1}
+    ];
+    const maxV=75,bw=100,inGap=16,gStep=330,gX=i=>80+i*gStep;
+    const Y=v=>base-v/maxV*(base-40);
+    x.font='22px "Segoe UI",system-ui,sans-serif';
+    groups.forEach((g,i)=>{
+      const x0=gX(i);
+      x.fillStyle='#C3CAD6';
+      x.beginPath();x.roundRect(x0,Y(g.ctrl),bw,base-Y(g.ctrl),[8,8,0,0]);x.fill();
+      x.fillStyle='#2374D5';
+      x.beginPath();x.roundRect(x0+bw+inGap,Y(g.test),bw,base-Y(g.test),[8,8,0,0]);x.fill();
+      x.fillStyle='#8A93A6';
+      x.fillText(String(g.ctrl).replace('.',','),x0+18,Y(g.ctrl)-12);
+      x.fillStyle='#1C2333';x.font='700 24px "Segoe UI",system-ui,sans-serif';
+      x.fillText(String(g.test).replace('.',','),x0+bw+inGap+14,Y(g.test)-12);
+      x.font='22px "Segoe UI",system-ui,sans-serif';x.fillStyle='#8A93A6';
+      x.fillText(g.l,x0+bw-14,H-24);
+    });
+    /* цель D30 = 37,4% — пунктир над третьей группой */
+    const tx=gX(2)-24,ty=Y(37.4);
+    x.strokeStyle='#3DA75C';x.lineWidth=4;x.setLineDash([12,10]);
+    x.beginPath();x.moveTo(tx,ty);x.lineTo(tx+bw*2+inGap+48,ty);x.stroke();
+    x.setLineDash([]);
+    x.fillStyle='#3DA75C';x.font='700 21px "Segoe UI",system-ui,sans-serif';
+    x.fillText('цель 37,4%',tx,ty-12);
+  })();
+})();
+</script>
+
+</body>
+</html>

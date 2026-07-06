@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Колесо бонусов — гипотеза H-025 · «Рабочие Руки»</title>
+<style>
+  :root{
+    --navy:#20315B; --navy-deep:#172444;
+    --sky:#4FA3DD; --sky-soft:#E1EFFA;
+    --green:#3DA75C; --green-soft:#E3F4E8;
+    --orange:#F5A93B;
+    --page:#EDEFF2; --card:#FFFFFF;
+    --text:#1C2333; --mist:#8A93A6;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--page);color:var(--text);font-family:-apple-system,"Segoe UI",system-ui,sans-serif;line-height:1.55;margin:0}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px 80px}
+  section{margin-top:56px}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sky);font-weight:700}
+  h1{font-size:clamp(30px,5vw,44px);font-weight:800;color:var(--navy);letter-spacing:-.02em;margin:10px 0 12px;text-wrap:balance}
+  h2{font-size:clamp(20px,3vw,26px);font-weight:800;color:var(--navy);letter-spacing:-.01em;margin:0 0 14px}
+  p{margin:0 0 10px}
+  .hero{background:var(--navy);color:#fff;padding:64px 20px 56px}
+  .hero .inner{max-width:880px;margin:0 auto}
+  .hero .eyebrow{color:var(--orange)}
+  .hero h1{color:#fff}
+  .hero p{color:#C9D4EA;max-width:60ch;font-size:17px}
+  .badges{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 26px}
+  .badge{font-size:12.5px;font-weight:700;border-radius:99px;padding:6px 14px;background:rgba(255,255,255,.12);color:#fff}
+  .badge.hot{background:var(--orange);color:#231A05}
+  .btn{display:inline-block;background:#fff;color:var(--navy);font-weight:800;font-size:16px;padding:15px 28px;border-radius:14px;text-decoration:none;transition:transform .12s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.sub{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.4);margin-left:10px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .card{background:var(--card);border-radius:18px;padding:20px;box-shadow:0 2px 10px rgba(23,36,68,.07)}
+  .card .big{font-size:32px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .card .lbl{font-size:12px;color:var(--mist);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:6px}
+  .card p{font-size:13.5px;color:#4A5265;margin:6px 0 0}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .step{background:var(--card);border-radius:18px;padding:20px;box-shadow:0 2px 10px rgba(23,36,68,.07)}
+  .step .n{width:34px;height:34px;border-radius:10px;background:var(--navy);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+  .step b{color:var(--navy)}
+  .step p{font-size:14px;color:#4A5265;margin:6px 0 0}
+  .carrot{background:var(--green-soft);border:1px solid rgba(61,167,92,.35);border-radius:18px;padding:24px}
+  .carrot h2{color:var(--green)}
+  .carrot p{font-size:15.5px;color:#2C4A36}
+  .carrot b{color:var(--green)}
+  .tablebox{overflow-x:auto;border-radius:14px;background:var(--card);box-shadow:0 2px 10px rgba(23,36,68,.07)}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);text-align:left;padding:11px 16px;border-bottom:1px solid var(--page)}
+  td{padding:10px 16px;border-bottom:1px solid var(--page)}
+  tr:last-child td{border-bottom:0}
+  td.num{font-variant-numeric:tabular-nums;text-align:right}
+  th.num{text-align:right}
+  .muted{color:var(--mist);font-size:13.5px}
+  .field{display:grid;grid-template-columns:240px 1fr;gap:10px;padding:11px 16px;border-bottom:1px solid var(--page);font-size:14px}
+  .field:last-child{border-bottom:0}
+  .field .k{color:var(--mist);font-weight:600}
+  .fieldbox{background:var(--card);border-radius:14px;box-shadow:0 2px 10px rgba(23,36,68,.07);overflow:hidden}
+  @media (max-width:560px){.field{grid-template-columns:1fr;gap:2px}}
+  .ask{background:var(--navy);color:#fff;border-radius:20px;padding:28px}
+  .ask h2{color:#fff}
+  .ask li{margin:8px 0;font-size:15.5px;color:#DCE4F5}
+  .ask b{color:var(--orange)}
+  footer{margin-top:56px;text-align:center;color:var(--mist);font-size:13px}
+  footer a{color:var(--sky);font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="hero"><div class="inner">
+  <div class="eyebrow">Гипотеза H-025 · «Рабочие Руки» · owner: Ирина Зараева</div>
+  <h1>Колесо бонусов: исполнители перестают отказываться от заданий</h1>
+  <p>Игровая механика внутри приложения РР: право крутить колесо и получать бонусы есть только у тех, кто не отказывается от принятых заданий. Проверяем за 4 недели на A/B-тесте, экономика защищена лимитом.</p>
+  <div class="badges">
+    <span class="badge hot">Пряник, а не кнут</span>
+    <span class="badge">ICE 18 · RICE 200</span>
+    <span class="badge">Риск 1/5 — минимальный</span>
+    <span class="badge">MVP · 4 недели · A/B 50/50</span>
+  </div>
+  <a class="btn" href="prototype.html">Открыть кликабельный прототип →</a>
+</div></div>
+
+<div class="wrap">
+
+<section>
+  <div class="eyebrow">Проблема</div>
+  <h2>Отказ от взятого задания — прямой убыток</h2>
+  <div class="cards">
+    <div class="card"><div class="lbl">Маржа с задания</div><div class="big">~800 ₽</div><p>Сорванная смена — это потерянная маржа и незакрытая заявка клиента.</p></div>
+    <div class="card"><div class="lbl">Доля без отказов сейчас</div><div class="big">замерим</div><p>Baseline фиксирует аналитик до старта (задача в плане, 3 дня). Это метрика успеха гипотезы.</p></div>
+    <div class="card"><div class="lbl">Цена для репутации</div><div class="big">клиент</div><p>Регулярные срывы смен — главная причина, по которой заказчик уходит с платформы.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Решение</div>
+  <h2>Три правила механики</h2>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><b>Выполнил задание — получил вращение</b><p>Копятся до 5, сгорают через 30 дней. Стимул работать регулярно.</p></div>
+    <div class="step"><div class="n">2</div><b>Крутишь — забираешь бонус</b><p>Баллы рейтинга, значок «Топ-исполнитель», сторис недели, немного денег. В стиле брендбука РР.</p></div>
+    <div class="step"><div class="n">3</div><b>Отказался — колесо замёрзло</b><p>Заморозка на 7 дней, накопленные вращения сгорают. Форс-мажор через поддержку — без заморозки.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="carrot">
+    <h2>Это пряник, а не кнут</h2>
+    <p>Штрафы за отказы у нас уже есть — это кнут, и он работает на пределе: сильнее наказывать нельзя, начнём терять исполнителей. Колесо добавляет <b>положительный стимул с той же целью</b>: исполнитель не платит за отказ больше — он <b>теряет привилегию</b>, которую сам накопил. Психологически это сильнее (терять накопленное больнее, чем получить штраф) и не выталкивает людей к конкурентам.</p>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Экономика</div>
+  <h2>Вращение стоит ~48 ₽ — это 6% маржи с задания</h2>
+  <div class="tablebox"><table>
+    <tr><th>Приз</th><th>Тип</th><th class="num">Вес</th><th class="num">Стоимость для нас</th></tr>
+    <tr><td>+50 баллов рейтинга</td><td>бесплатный</td><td class="num">28%</td><td class="num">0 ₽</td></tr>
+    <tr><td>Значок «Топ-исполнитель» 7 дн</td><td>бесплатный</td><td class="num">14%</td><td class="num">0 ₽</td></tr>
+    <tr><td>Двойные баллы рейтинга 3 дня</td><td>бесплатный</td><td class="num">13%</td><td class="num">0 ₽</td></tr>
+    <tr><td>+100 ₽ к следующей выплате</td><td>денежный</td><td class="num">12%</td><td class="num">12 ₽</td></tr>
+    <tr><td>Ещё одно вращение</td><td>бесплатный</td><td class="num">12%</td><td class="num">0 ₽</td></tr>
+    <tr><td>+100 баллов рейтинга</td><td>бесплатный</td><td class="num">11%</td><td class="num">0 ₽</td></tr>
+    <tr><td>«Звезда РР» — сторис недели</td><td>бесплатный</td><td class="num">7%</td><td class="num">0 ₽</td></tr>
+    <tr><td>Джекпот +1000 ₽ к след. выплате</td><td>денежный</td><td class="num">3%</td><td class="num">30 ₽</td></tr>
+  </table></div>
+  <div class="cards" style="margin-top:14px">
+    <div class="card"><div class="lbl">Бесплатных призов</div><div class="big">85%</div><p>Рейтинг, значки, сторис — уже есть в продукте, стоят ноль.</p></div>
+    <div class="card"><div class="lbl">Деньги — самоокупаемые</div><div class="big">фикс</div><p>Денежные бонусы платятся только со следующим выполненным заданием — вместе с новой маржой 800 ₽.</p></div>
+    <div class="card"><div class="lbl">Окупаемость</div><div class="big">−2 п.п.</div><p>Достаточно снизить отказы на 2 п.п., чтобы колесо отбилось. Всё сверху — прибыль.</p></div>
+  </div>
+  <p class="muted" style="margin-top:12px">Бюджет пилота — фиксированный лимит, утверждается после замера baseline (калькулятор — в кабинете маркетолога внутри прототипа). При превышении лимита механика отключается фиче-флагом в один клик.</p>
+</section>
+
+<section>
+  <div class="eyebrow">Карточка гипотезы H-025</div>
+  <h2>Все данные проекта</h2>
+  <div class="fieldbox">
+    <div class="field"><span class="k">Формулировка</span><span>Если запустить колесо бонусов, где участие доступно только при отсутствии отказов от заданий, то доля исполнителей без отказов вырастет на +10% относительно baseline, потому что исполнители получат регулярный игровой стимул принимать задания без отказов</span></div>
+    <div class="field"><span class="k">Тип · категория</span><span>Marketing · рекрутинг и удержание исполнителей</span></div>
+    <div class="field"><span class="k">Сегмент</span><span>Все исполнители в приложении</span></div>
+    <div class="field"><span class="k">Ожидаемый эффект</span><span>Рост retention (% исполнителей, оставшихся активными)</span></div>
+    <div class="field"><span class="k">Метрика успеха</span><span>Доля исполнителей без отказов за период проверки</span></div>
+    <div class="field"><span class="k">Baseline</span><span>Надо замерить (задача аналитика, 3 дня)</span></div>
+    <div class="field"><span class="k">Target · критерий успеха</span><span>+10% относительно baseline за период проверки</span></div>
+    <div class="field"><span class="k">Способ · срок</span><span>MVP в приложении · 4 недели · A/B-тест 50/50 по ID исполнителей</span></div>
+    <div class="field"><span class="k">Оценки</span><span>Impact 3 · Confidence 2 · Ease 3 (ICE 18) · Effort 3 · Risk 1 · RICE 200</span></div>
+    <div class="field"><span class="k">Owner · статус</span><span>Ирина Зараева · Draft, приоритет 🟡</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">План проверки</div>
+  <h2>5 шагов, 6 недель от «да» до отчёта</h2>
+  <div class="tablebox"><table>
+    <tr><th>Шаг</th><th>Что делаем</th><th>Кто</th><th class="num">Срок</th></tr>
+    <tr><td>1. Baseline и группы</td><td>SQL-выгрузка доли без отказов за 4 недели; деление базы 50/50 на тест и контроль</td><td>Аналитик</td><td class="num">до 10.07</td></tr>
+    <tr><td>2. Экономика</td><td>Матрица призов и весов, лимит бюджета — согласование с финансами</td><td>Продакт</td><td class="num">до 13.07</td></tr>
+    <tr><td>3. MVP</td><td>Экран колеса + серверная проверка отказов + релиз на тест-группу через фиче-флаг</td><td>Разработчик</td><td class="num">до 23.07</td></tr>
+    <tr><td>4. Мониторинг</td><td>Ежедневный дашборд: вращения, отказы, расход — 4 недели теста</td><td>Аналитик</td><td class="num">теста</td></tr>
+    <tr><td>5. Итоги</td><td>Отчёт: доля без отказов тест vs контроль, p-value, retention, решение о раскатке</td><td>Продакт + аналитик</td><td class="num">+6 нед.</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <div class="ask">
+    <h2>Что нужно для старта</h2>
+    <ul>
+      <li><b>3 дня аналитика</b> — замер baseline (SQL уже описан в плане);</li>
+      <li><b>~2 недели разработчика</b> — MVP: экран колеса, проверка отказов, фиче-флаг;</li>
+      <li><b>Призовой фонд с фиксированным лимитом</b> — сумма из калькулятора после baseline;</li>
+      <li><b>Решение сейчас</b> — план стартует немедленно, отчёт с цифрами через 6 недель. Если не сработает — выключаем флагом, потери ограничены временем разработки (риск 1/5).</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <p><a href="prototype.html">Кликабельный прототип</a>: экраны приложения (задание выполнено → колесо → заморозка при отказе) и кабинет маркетолога в CRM с калькулятором бюджета, аналитикой и картой эксперимента.</p>
+</footer>
+
+</div>
+</body>
+</html>
